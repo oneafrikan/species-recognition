@@ -1,3 +1,22 @@
+## Routing
+
+No specialist is pre-assigned to any task group below. The Tech Lead decides
+routing at the point of actually starting the build — per task group, not
+once for the whole change — based on what each group actually needs (e.g.
+`grid-backend-dev` for application logic vs. `grid-data-engineer` if a task
+turns out to be pipeline/warehousing-shaped, which none currently are).
+Include `grid-ponytail` for a simplicity/de-bloat pass on the implementation
+before QA sign-off — this project has an explicit "don't over-engineer"
+mandate (see design.md's Goals/Non-Goals), so that check is load-bearing,
+not optional. `grid-qa-engineer` is the release gate per the Tech Lead's
+standard roster rules — it verifies against this change's specs/ acceptance
+criteria, it doesn't implement.
+
+7.3 and 7.4 (manual end-to-end runs against real photos and a live Ollama
+instance) are the user's own verification once the build is done, not an
+agent task — that's the point of shipping quickly: get it in front of real
+testing.
+
 ## 1. Project scaffold
 
 - [ ] 1.1 Create the `species_tag/` package with empty modules per design.md's layout (`__main__.py`, `config.py`, `discovery.py`, `backends/base.py`, `backends/ollama.py`, `tagging.py`, `exif.py`, `reporting.py`)
