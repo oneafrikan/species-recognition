@@ -5,8 +5,10 @@ backend: ollama              # only valid value in v1; reserved for future cloud
 
 ollama:
   host: http://localhost:11434
-  active_model: llama3.2-vision
+  active_model: qwen2.5vl      # best result in real testing: 25/26 correct, 0 false
+                                # negatives — see README's Status section
   models_to_test:            # documentation/reference list for your own A/B testing
+    - qwen2.5vl
     - llama3.2-vision
     - llava
     - minicpm-v

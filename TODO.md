@@ -15,7 +15,7 @@
 
 ## Repo
 
-- [ ] Made public (was private under `oneafrikan`).
+- [x] Made public (was private under `oneafrikan`).
 - [ ] Add `gkwilderness` as a GitHub collaborator, so it's usable from both accounts.
 
 ## Other ideas raised, not committed to

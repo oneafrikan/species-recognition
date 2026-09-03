@@ -2,7 +2,7 @@
 
 Batch-tags a folder of wildlife photos with species keywords, using a local vision model served by [Ollama](https://ollama.com) — no cloud, no per-image cost. Built for camera-trap, wildlife-photography, and drone-footage workflows across any geography.
 
-**Status:** core pipeline implemented, pending manual end-to-end verification. See [Status](#status) below.
+**Status:** implemented and tested against real photos. See [Status](#status) below.
 
 ## What it does
 
@@ -26,9 +26,9 @@ Every run reprocesses every image found — there's no "already tagged, skip it"
   - Windows: download the installer from [exiftool.org](https://exiftool.org) (or `choco install exiftool`)
 - [Ollama](https://ollama.com) running somewhere reachable — locally, or on another machine on your network (e.g. a GPU box) — with at least one vision-capable model pulled:
   ```bash
+  ollama pull qwen2.5vl        # recommended — best result in real testing, see Status below
   ollama pull llama3.2-vision
   ollama pull llava
-  ollama pull minicpm-v
   ```
 
 ## Setup
@@ -59,17 +59,29 @@ See `config.example.yaml`. Key fields:
 | `ollama.host` | Where Ollama is running — can point at a different machine than the one running this script |
 | `ollama.active_model` | Which pulled model to use for this run |
 | `ollama.models_to_test` | Reference list of models you're comparing — swap `active_model` between runs to A/B them |
+| `ollama.num_ctx` | Context window size, default 8192. Ollama's own default (2048) silently truncates prompt+image context on most vision models — this is the single biggest accuracy lever, see Status below. Raise it if you have RAM/VRAM headroom; lower it on a tight-VRAM GPU box |
 | `region_context` | Free-text geographic hint injected into the model prompt (e.g. "South American Pantanal wildlife") — no hardcoded species list, this is how the tool adapts to any region |
 | `min_confidence` | `low` / `medium` / `high` — results below this are tagged `review_needed` instead of trusted outright |
 
 ## Status
 
-This repo is spec'd via [OpenSpec](https://github.com/Fission-AI/OpenSpec) — see `openspec/changes/species-tagging-cli-v1/` for the full proposal, capability specs, architecture design, and build task list. Sections 1–6 of `tasks.md` (scaffold through CLI wiring) plus unit tests for `tagging.py` and `config.py` are done. Still outstanding: a manual end-to-end run against real photos with a live Ollama instance (`tasks.md` 7.3/7.4) — the `backends/ollama.py` request/response handling follows Ollama's documented API but hasn't been exercised against a running Ollama instance.
+Built and manually tested against 26 real photos, across all five practical Ollama vision models (`qwen2.5vl`, `llama3.2-vision`, `llava`, `bakllava`, `moondream`).
+
+- **`qwen2.5vl` is the clear best** — 25/26 correct, 0 false negatives, one slow timeout on a single image (not a detection failure). Recommended default.
+- **A real bug, not model weakness, was the majority cause of early poor results**: Ollama's default `num_ctx` (2048 tokens) was silently truncating prompt+image context. Fixing it (raising `ollama.num_ctx`, see Config below) took `llava` from 13/26 correctly-tagged to 20/26 in direct testing.
+- `llama3.2-vision` may hit an `unknown model architecture: 'mllama'` error depending on your Ollama install/version — a real install issue seen in testing, not a code bug; `qwen2.5vl` doesn't have this problem.
+- `bakllava` sees animals correctly but often won't follow the requested output format; `moondream` is too small (1.8B, hard 2048-token context ceiling) for reliable results.
+
+Full proposal, capability specs, architecture design, and build task list: `openspec/changes/species-tagging-cli-v1/`. Not yet archived — a wider real-photo run and a Ubuntu pass (`tasks.md` 7.3/7.4) are still open.
+
+## v2: MegaDetector + SpeciesNet
+
+A specced-but-not-built alternate backend using a purpose-trained detect-then-classify pipeline (MegaDetector + SpeciesNet) instead of a general vision-language model — see `openspec/changes/megadetector-speciesnet-backend/`. Deliberately deferred until real GPU hardware is available to build and test it against, rather than guessing.
 
 ## v1 scope
 
-Local/remote Ollama only. A cloud API backend is architected as an extension point but not implemented. Also deferred to a later version: a GUI, blank-frame pre-filtering, scientific names, hierarchical keywords, a results database, and pip-installable packaging — see the proposal for the full list.
+Local/remote Ollama only. A cloud API backend is architected as an extension point but not implemented. Also deferred: a GUI, scientific names, hierarchical keywords, a results database, and pip-installable packaging — see the proposal for the full list.
 
 ## License
 
-Private repo, personal project. No license file yet — treat as all-rights-reserved until one is added.
+No license file yet — treat as all-rights-reserved until one is added.
