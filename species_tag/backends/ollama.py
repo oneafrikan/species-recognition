@@ -26,6 +26,7 @@ from .base import SpeciesResult, VisionBackend
 _REQUEST_TIMEOUT_SECONDS = 120
 
 _LINE_RE = re.compile(r"^(?P<name>[^:]+):\s*(?P<confidence>low|medium|high)\s*$", re.IGNORECASE)
+_LEADING_MARKER_RE = re.compile(r"^\s*(?:[-*]|\d+[.)])\s*")
 
 
 def _build_prompt(region_context: str) -> str:
@@ -38,6 +39,9 @@ def _build_prompt(region_context: str) -> str:
         "Respond with exactly one line per animal, in this format:\n"
         "<common species name>: <confidence>\n"
         "where <confidence> is one of: low, medium, high.\n"
+        "Example response for a photo with two animals:\n"
+        "Lion: high\n"
+        "Impala: medium\n"
         "If no animal is visible in the image, respond with exactly: none\n"
         "Do not include any other text, explanation, or punctuation."
     )
@@ -46,8 +50,12 @@ def _build_prompt(region_context: str) -> str:
 def _parse_response(text: str) -> List[SpeciesResult]:
     """Parse the model's plain-text response into SpeciesResult objects.
 
-    Raises ValueError if the response doesn't follow the requested format —
-    the caller treats that as a per-image error (design.md's error-handling shape).
+    Not every model reliably sticks to the requested "name: confidence" format even
+    when told to (observed directly: bakllava frequently answers with a bare species
+    name, a sentence, or commentary on some lines while getting others right). Rather
+    than failing the whole image over one noisy line, this skips lines it can't parse
+    and keeps whatever it can — an image only becomes an error if NOTHING parseable
+    came back from a non-empty, non-"none" response.
     """
     text = text.strip()
     if not text or text.lower() == "none":
@@ -55,15 +63,17 @@ def _parse_response(text: str) -> List[SpeciesResult]:
 
     results = []
     for line in text.splitlines():
-        line = line.strip()
+        line = _LEADING_MARKER_RE.sub("", line.strip())
         if not line:
             continue
         match = _LINE_RE.match(line)
-        if not match:
-            raise ValueError(f"unparseable response line from model: {line!r}")
-        results.append(
-            SpeciesResult(name=match.group("name").strip(), confidence=match.group("confidence").lower())
-        )
+        if match:
+            results.append(
+                SpeciesResult(name=match.group("name").strip(), confidence=match.group("confidence").lower())
+            )
+
+    if not results:
+        raise ValueError(f"no parseable species: confidence lines in model response: {text!r}")
     return results
 
 
