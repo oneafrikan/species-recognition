@@ -2,7 +2,7 @@
 
 Batch-tags a folder of wildlife photos with species keywords, using a local vision model served by [Ollama](https://ollama.com) — no cloud, no per-image cost. Built for camera-trap, wildlife-photography, and drone-footage workflows across any geography.
 
-**Status:** spec complete, implementation not started. See [Status](#status) below.
+**Status:** core pipeline implemented, pending manual end-to-end verification. See [Status](#status) below.
 
 ## What it does
 
@@ -64,7 +64,7 @@ See `config.example.yaml`. Key fields:
 
 ## Status
 
-This repo is spec'd via [OpenSpec](https://github.com/Fission-AI/OpenSpec) — see `openspec/changes/species-tagging-cli-v1/` for the full proposal, capability specs, architecture design, and build task list. Implementation hasn't started yet; `tasks.md` in that folder is the build checklist.
+This repo is spec'd via [OpenSpec](https://github.com/Fission-AI/OpenSpec) — see `openspec/changes/species-tagging-cli-v1/` for the full proposal, capability specs, architecture design, and build task list. Sections 1–6 of `tasks.md` (scaffold through CLI wiring) plus unit tests for `tagging.py` and `config.py` are done. Still outstanding: a manual end-to-end run against real photos with a live Ollama instance (`tasks.md` 7.3/7.4) — the `backends/ollama.py` request/response handling follows Ollama's documented API but hasn't been exercised against a running Ollama instance.
 
 ## v1 scope
 
