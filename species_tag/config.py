@@ -15,6 +15,10 @@ import yaml
 _REQUIRED_TOP_LEVEL = ["backend", "ollama", "region_context", "min_confidence"]
 _REQUIRED_OLLAMA = ["host", "active_model", "models_to_test"]
 _VALID_CONFIDENCE_LEVELS = ("low", "medium", "high")
+# Safe default if a config omits num_ctx — matches what testing showed fixes the
+# default-2048 context-truncation bug without assuming headroom a smaller machine
+# (e.g. the 3060 box) may not have. Machines with more RAM/VRAM can raise it.
+_DEFAULT_NUM_CTX = 8192
 
 
 class ConfigError(Exception):
@@ -29,6 +33,7 @@ class OllamaConfig:
     host: str
     active_model: str
     models_to_test: list
+    num_ctx: int = _DEFAULT_NUM_CTX
 
 
 @dataclass
@@ -76,12 +81,17 @@ def load_config(path: Union[str, Path]) -> Config:
             f"{_VALID_CONFIDENCE_LEVELS}, got: {data['min_confidence']!r}"
         )
 
+    num_ctx = ollama_data.get("num_ctx", _DEFAULT_NUM_CTX)
+    if not isinstance(num_ctx, int) or isinstance(num_ctx, bool) or num_ctx <= 0:
+        raise ConfigError(f"config field 'ollama.num_ctx' must be a positive integer, got: {num_ctx!r}")
+
     return Config(
         backend=data["backend"],
         ollama=OllamaConfig(
             host=ollama_data["host"],
             active_model=ollama_data["active_model"],
             models_to_test=ollama_data["models_to_test"],
+            num_ctx=num_ctx,
         ),
         region_context=data["region_context"],
         min_confidence=data["min_confidence"],

@@ -35,7 +35,9 @@ def main(argv=None) -> int:
         print(f"Error: '{folder}' is not a directory", file=sys.stderr)
         return 1
 
-    backend = OllamaBackend(host=config.ollama.host, model=config.ollama.active_model)
+    backend = OllamaBackend(
+        host=config.ollama.host, model=config.ollama.active_model, num_ctx=config.ollama.num_ctx
+    )
     images = discovery.find_images(folder)
     tally = reporting.Tally()
 

@@ -71,6 +71,11 @@ ollama:
     - llama3.2-vision
     - llava
     - minicpm-v
+  num_ctx: 8192               # optional, default 8192. Ollama's own default (2048) was
+                               # measured to silently truncate prompt+image context —
+                               # confirmed as the majority root cause of early false
+                               # "no animal detected" results. Machine-specific: raise on
+                               # a high-RAM box, lower on a tight-VRAM GPU.
 region_context: "Southern African safari wildlife"
 min_confidence: medium        # low | medium | high
 ```

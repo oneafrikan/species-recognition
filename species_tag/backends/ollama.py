@@ -78,9 +78,10 @@ def _parse_response(text: str) -> List[SpeciesResult]:
 
 
 class OllamaBackend(VisionBackend):
-    def __init__(self, host: str, model: str):
+    def __init__(self, host: str, model: str, num_ctx: int):
         self.host = host.rstrip("/")
         self.model = model
+        self.num_ctx = num_ctx
 
     def identify(self, image_bytes: bytes, region_context: str) -> List[SpeciesResult]:
         payload = {
@@ -88,6 +89,12 @@ class OllamaBackend(VisionBackend):
             "prompt": _build_prompt(region_context),
             "images": [b64encode(image_bytes).decode("ascii")],
             "stream": False,
+            # Ollama's own default (2048) is too small for prompt + image tokens combined
+            # — observed directly as silent context truncation (llava) and a hard 400
+            # "exceeds the available context size" error (qwen2.5vl) in real testing.
+            # Configurable per-machine (config.yaml ollama.num_ctx) since safe headroom
+            # differs a lot between e.g. a 24GB unified-memory Mac and a fixed-VRAM GPU.
+            "options": {"num_ctx": self.num_ctx},
         }
         response = requests.post(
             f"{self.host}/api/generate", json=payload, timeout=_REQUEST_TIMEOUT_SECONDS

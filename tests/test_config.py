@@ -115,3 +115,34 @@ def test_invalid_min_confidence_errors(tmp_path):
     )
     with pytest.raises(ConfigError, match="min_confidence"):
         load_config(path)
+
+
+def test_num_ctx_defaults_when_omitted(tmp_path):
+    path = _write(tmp_path, VALID_YAML)
+    config = load_config(path)
+    assert config.ollama.num_ctx == 8192
+
+
+def test_num_ctx_override_applies(tmp_path):
+    path = _write(
+        tmp_path,
+        VALID_YAML.replace(
+            "models_to_test:\n    - llama3.2-vision\n    - llava\n",
+            "models_to_test:\n    - llama3.2-vision\n    - llava\n  num_ctx: 16384\n",
+        ),
+    )
+    config = load_config(path)
+    assert config.ollama.num_ctx == 16384
+
+
+@pytest.mark.parametrize("bad_value", [0, -1, "a lot", True])
+def test_invalid_num_ctx_errors(tmp_path, bad_value):
+    path = _write(
+        tmp_path,
+        VALID_YAML.replace(
+            "models_to_test:\n    - llama3.2-vision\n    - llava\n",
+            f"models_to_test:\n    - llama3.2-vision\n    - llava\n  num_ctx: {bad_value!r}\n",
+        ),
+    )
+    with pytest.raises(ConfigError, match="num_ctx"):
+        load_config(path)

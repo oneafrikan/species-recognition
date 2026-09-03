@@ -12,3 +12,6 @@ config.yaml
 
 # exiftool backup files created on write
 *_original
+
+# Local test images — never commit real photos
+/test-photos/
