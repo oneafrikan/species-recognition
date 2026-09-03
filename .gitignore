@@ -15,3 +15,6 @@ config.yaml
 
 # Local test images — never commit real photos
 /test-photos/
+
+# Claude Code session-runtime state, not project content
+.claude/scheduled_tasks.lock
