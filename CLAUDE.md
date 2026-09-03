@@ -14,6 +14,7 @@ This repo uses [OpenSpec](https://github.com/Fission-AI/OpenSpec) (`openspec ini
 
 - **`species-tagging-cli-v1`** — the Ollama-based CLI (`species_tag/`). Proposal, 4 capability specs (`image-discovery`, `species-identification`, `metadata-tagging`, `cli-reporting`), design, tasks. **Implemented and manually tested** (see Status below) — not yet archived, since 7.3/7.4 (wider real-photo run, Ubuntu pass) are still open.
 - **`megadetector-speciesnet-backend`** — an alternate detect-then-classify backend (MegaDetector + SpeciesNet), targeting the Ubuntu 3060 box. Proposal, 2 capability specs (`blank-frame-filtering`, `species-classification-local`), design, tasks. **Spec only, deliberately not implemented** — build is deferred until that hardware exists.
+- **`focus-quality-screening`** — flags soft/blurry/front-back-focused shots as an additional keyword. Proposal, 2 capability specs (`frame-blur-detection` — settled, ready to build; `subject-focus-detection` — explicitly pilot-first, the detection method is genuinely unresolved). **Spec only, deliberately not implemented** — build deferred, per the user.
 
 Read the relevant change's `design.md` before writing any code — module layout and key decisions are already made there. Don't re-derive them. `openspec init` also installed `.claude/skills/openspec-*` and `.claude/commands/opsx/*` (`/opsx:propose`, `/opsx:apply`, `/opsx:archive`, etc.) — use those for any future change instead of the raw `openspec` CLI where convenient.
 

@@ -18,7 +18,13 @@
 - [x] Made public (was private under `oneafrikan`).
 - [ ] Add `gkwilderness` as a GitHub collaborator, so it's usable from both accounts.
 
+## v3 (focus-quality screening): specced, not built
+
+`openspec/changes/focus-quality-screening/` — proposal/specs/design/tasks written and validated. Two capabilities:
+
+- `frame-blur-detection`: settled, ready to build (Laplacian variance, `opencv-python` only new dependency).
+- `subject-focus-detection`: explicitly pilot-first — the detection-method choice (Ollama VLM grounding prompt vs. reusing `megadetector-speciesnet-backend`'s MegaDetector stage) is unresolved by design; task 3.1 is a ~20-image pilot before any real build-out, and "neither works well enough" is a legitimate outcome per design.md.
+
 ## Other ideas raised, not committed to
 
-- Focus/blur-quality screening (eye-in-focus detection) — researched (Laplacian variance for frame-level blur is cheap and solid; subject/eye-region focus is a genuinely harder unsolved problem, no good lightweight existing solution found). Not scoped as a change yet.
 - v1's own deferred list (cloud API backend, GUI, scientific names, hierarchical keywords, results database, pip packaging) — see `openspec/changes/species-tagging-cli-v1/proposal.md`.
