@@ -1,0 +1,16 @@
+# Copy this file to config.yaml and edit for your setup. config.yaml is
+# gitignored since it may contain a private network host.
+
+backend: ollama              # only valid value in v1; reserved for future cloud backends
+
+ollama:
+  host: http://localhost:11434
+  active_model: llama3.2-vision
+  models_to_test:            # documentation/reference list for your own A/B testing
+    - llama3.2-vision
+    - llava
+    - minicpm-v
+
+region_context: "Southern African safari wildlife"
+
+min_confidence: medium        # low | medium | high
